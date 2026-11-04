@@ -1,6 +1,6 @@
 name: trackcloudflare
 x-common: &common
-  image: trackcloudflare:1.10-portable.1
+  image: trackcloudflare:1.10-portable.2
   platform: linux/amd64
   user: "1000:1000"
   read_only: true
@@ -80,5 +80,20 @@ services:
     volumes: ["runtime:/service:ro"]
     # Use the shared DNS subdirectory, which receives atomic hosts files.
     command: [--keep-in-foreground, --port=5353, --no-resolv, --no-hosts, "--server=${DNS_UPSTREAM:-1.1.1.1}", --hostsdir=/service/dns, --local-ttl=30, --cache-size=0, --no-poll]
+  collector:
+    <<: *common
+    profiles: [collect]
+    command: [collector]
+    depends_on: {init: {condition: service_completed_successfully}}
+    environment:
+      EXCLUDED_KEYWORDS: ${EXCLUDED_KEYWORDS:-}
+      COLLECTOR_ROOT: /project
+      COLLECTOR_CONFIG: /private/downloaders.json
+    volumes: ["./config:/project/config:ro", "./private:/private:ro", "runtime:/project/runtime"]
+    healthcheck:
+      test: [CMD, python, -c, "import json,time; p=json.load(open('/project/runtime/state/transfer/collector.json')); assert p['ok'] and 0<=time.time()-p['at']<180"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 volumes:
   runtime:

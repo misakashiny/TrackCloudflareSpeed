@@ -3,7 +3,7 @@ import time
 from benefit_reports import compact_round,build
 
 def update(root,transfer):
-    from observe_transfers import read,atomic
+    from state_io import read,atomic
     now=int(time.time());state=root/'runtime/state';directory=state/'reports';directory.mkdir(exist_ok=True)
     rounds=read(directory/'domain-rounds.json',[]);known={r.get('started_at') for r in rounds}
     for path in (state/'history').glob('*.json'):
@@ -17,10 +17,10 @@ def update(root,transfer):
     # Seed historical rates only; old samples lack cumulative counters. Do not
     # invent historical byte totals or apply current quotas to old measurements.
     if not points:
-        points=[{'at':r['at'],'up_Bps':r.get('up_Bps',0),'down_Bps':r.get('down_Bps',0),'all_clients_ok':len(r.get('clients',{}))==3 and all(c.get('ok') for c in r['clients'].values())} for r in read(state/'transfer/samples.json',[])]
+        points=[{'at':r['at'],'up_Bps':r.get('up_Bps',0),'down_Bps':r.get('down_Bps',0),'all_clients_ok':bool(r.get('clients')) and all(c.get('ok') for c in r['clients'].values())} for r in read(state/'transfer/samples.json',[])]
     clients=transfer.get('clients',{});counters={n:c['counters'] for n,c in clients.items() if c.get('ok') and c.get('counters')}
     point={'at':transfer['at'],'up_Bps':transfer.get('total_up_Bps',0),'down_Bps':transfer.get('total_down_Bps',0),
-           'all_clients_ok':len(clients)==3 and all(c.get('ok') for c in clients.values()),'counters':counters if len(counters)==3 else None}
+           'all_clients_ok':bool(clients) and all(c.get('ok') for c in clients.values()),'counters':counters if clients and len(counters)==len(clients) else None}
     points=[p for p in points if p.get('at')!=point['at'] and 0<=now-p.get('at',0)<=604800+120]+[point]
     points=sorted(points,key=lambda p:p['at'])[-10500:]
     jobs=read(state/'acceptance/history.json',[])

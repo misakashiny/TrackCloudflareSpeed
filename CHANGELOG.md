@@ -19,3 +19,7 @@
 ## 1.10-portable.1
 
 Added standalone backend, Docker Compose, DNS sidecar, expiry guard, safe empty defaults, configurable upstream and UI trust boundary, pinned CFST acquisition, and offline integration tests. NAS-specific active downloader experiments return 501 in this deployment.
+
+## 1.10-portable.2
+
+Added optional generic multi-QB/TR read-only collector, private credential references, bounded HTTP access, managed-domain tracker aggregation, configurable client names, arbitrary client-count reporting and mock API tests. No rate-limit experiments or downloader actions added.

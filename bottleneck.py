@@ -22,7 +22,7 @@ def recent_counter_evidence(transfer,points,now):
     at=num(transfer.get('at'))
     if at is not None and 0<=now-at<=900:
         counters=clean_counters({name:client.get('counters') for name,client in transfer.get('clients',{}).items()})
-        rows[at]={'at':at,'counters':counters,'all_clients_ok':bool(len(names)==3 and counters and all(c.get('ok') for c in transfer['clients'].values()))}
+        rows[at]={'at':at,'counters':counters,'all_clients_ok':bool(names and counters and all(c.get('ok') for c in transfer['clients'].values()))}
     rows=sorted(rows.values(),key=lambda row:row['at'])
     def summary(name=None):
         selected=[{**row,'counters':({name:row['counters'][name]} if name and row.get('counters') else row.get('counters'))} for row in rows]
@@ -69,7 +69,7 @@ def explain(transfer,now,counter_points=None):
                           'evidence':{'active_samples':window.get('active_samples' if is_task else 'limited_active_samples'),
                                       'near_samples':window.get('near_limit_samples'),'span_seconds':window.get('span_seconds'),
                                       'since':window.get('since'),'until':window.get('until'),
-                                      'scope':'单任务额度约束的活跃任务' if is_task else '遵循会话额度的任务' if name=='pt_transmission' else '客户端全局流量'},
+                                      'scope':'单任务额度约束的活跃任务' if is_task else '遵循会话额度的任务' if c.get('type')=='tr' or name=='pt_transmission' else '客户端全局流量'},
                           'next':'有稳定需求时，在原预算内开展短时配额对照；不根据瞬时值永久放开额度。'})
         if not active:
             counter=row['counter_window']

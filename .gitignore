@@ -1,4 +1,5 @@
 runtime/
+private/
 .env
 .env.*
 !.env.example

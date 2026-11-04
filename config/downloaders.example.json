@@ -1,0 +1,22 @@
+{
+  "clients": [
+    {
+      "id": "qb_main",
+      "name": "主下载器 QB",
+      "type": "qb",
+      "url": "http://qb.example.invalid:8080",
+      "enabled": true,
+      "username_file": "/private/secrets/qb_user",
+      "password_file": "/private/secrets/qb_password"
+    },
+    {
+      "id": "tr_seed",
+      "name": "做种 TR",
+      "type": "tr",
+      "url": "http://tr.example.invalid:9091/transmission/rpc",
+      "enabled": true,
+      "username_file": "/private/secrets/tr_user",
+      "password_file": "/private/secrets/tr_password"
+    }
+  ]
+}

@@ -21,9 +21,9 @@ def capacity_evidence(points,now):
         rates=[]
         for a,b in zip(window,window[1:]):
             ca,cb=a['counters'],b['counters']
-            if len(ca)!=3 or set(ca)!=set(cb) or any(ca[n]['source']!=cb[n]['source'] or cb[n]['up']<ca[n]['up'] for n in ca):break
+            if not ca or set(ca)!=set(cb) or any(ca[n]['source']!=cb[n]['source'] or cb[n]['up']<ca[n]['up'] for n in ca):break
             rates.append(sum(cb[n]['up']-ca[n]['up'] for n in ca)/(b['at']-a['at']))
-        if len(rates)==len(window)-1 and min(rates)>0:windows.append({'at':r['at'],'lower_Bps':int(min(rates)),'mean_Bps':round(statistics.mean(rates)),'span_seconds':window[-1]['at']-window[0]['at'],'basis':'三个客户端同源累计上传计数差额，连续采样间隔均不超过100秒'})
+        if len(rates)==len(window)-1 and min(rates)>0:windows.append({'at':r['at'],'lower_Bps':int(min(rates)),'mean_Bps':round(statistics.mean(rates)),'span_seconds':window[-1]['at']-window[0]['at'],'basis':'全部已配置客户端同源累计上传计数差额，连续采样间隔均不超过100秒'})
     best=max(windows,key=lambda x:x['lower_Bps'],default=None)
     quantum=32768
     candidate=best['lower_Bps']*4//(5*quantum)*quantum if best else None

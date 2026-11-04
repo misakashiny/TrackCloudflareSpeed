@@ -2,7 +2,7 @@
 
 完整的独立 Docker 源码部署项目：优选引擎、管理界面、DNS 服务、过期覆盖回收、连接对照和历史分析。默认空站点、观察模式，不连接任何下载器。
 
-当前便携版 `1.10-portable.1`，Linux amd64。ARM64 尚未提供经过校验的工具链，不支持直接切换平台构建。
+当前便携版 `1.10-portable.2`，Linux amd64。ARM64 尚未提供经过校验的工具链，不支持直接切换平台构建。
 
 ## 部署
 
@@ -50,14 +50,14 @@ dnsmasq 动态监视共享 DNS 目录，禁用上游缓存、本地 TTL 30 秒�
 
 ## 传输报告与高级试验
 
-连接改善与 PT 文件传输收益分开统计。此独立项目没有默认下载器连接、真实传输样本或限速执行器，因此上传能力、文件收益、下载器 Tracker 状态会显示数据不足。可以由外部只读采集器提供兼容状态；尚未提供通用采集器安装流程。
+连接改善与 PT 文件传输收益分开统计。此独立项目没有默认下载器连接、真实传输样本或限速执行器，因此上传能力、文件收益、下载器 Tracker 状态会显示数据不足。现在可以启用可选的通用 QB/TR 只读采集器，自行添加多台下载器，凭据从私有文件、环境变量或 Docker secrets 读取。设置步骤见 [采集器说明](docs/COLLECTOR.md)。采集器不会设置限速或操作任务。
 
 NAS 专用的 MoviePilot 凭据读取、种子港额度执行、宿主 systemd、上行短测和任务试验脚本不适合移植到任意机器，未作为自动服务打包。高级试验 API 明确返回 501，不会排队等待一个不存在的执行器。管理页面保留分析视图和解释。这套 Docker 项目可以独立完成域名优选和 DNS 服务，但不声称具备通用的下载器限速调度。
 
 ## 验证
 
 ```sh
-python -m unittest test_public_dns test_reports_health test_effective_policy test_speed
+python -m unittest test_collector test_public_dns test_reports_health test_effective_policy test_speed
 python tools/smoke.py
 node tests/ui.test.cjs
 ```

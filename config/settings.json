@@ -1,0 +1,20 @@
+{
+  "domains": [],
+  "interval_seconds": 1800,
+  "max_age_seconds": 21600,
+  "candidate_limit": 16,
+  "candidate_budget_seconds": 25,
+  "baseline_addresses": 3,
+  "history_rounds": 240,
+  "metadata_proxy": "",
+  "public_dns_direct_fallback": true,
+  "baseline_dns_server": "1.1.1.1",
+  "update": {
+    "enabled": false
+  },
+  "speed": {
+    "mode": "shadow",
+    "allow_domains": [],
+    "allow_fake_ip_baseline": false
+  }
+}

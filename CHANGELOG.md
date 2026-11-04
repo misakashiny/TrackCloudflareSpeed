@@ -15,3 +15,7 @@
 - 增加不联网的合成测试。
 
 没有变更后台优选算法、任务调度、站点配置或带宽控制规则；不包含新的传输收益结论。
+
+## 1.10-portable.1
+
+Added standalone backend, Docker Compose, DNS sidecar, expiry guard, safe empty defaults, configurable upstream and UI trust boundary, pinned CFST acquisition, and offline integration tests. NAS-specific active downloader experiments return 501 in this deployment.

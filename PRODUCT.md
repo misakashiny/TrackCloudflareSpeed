@@ -1,9 +1,3 @@
-# 产品定位
+# Product
 
-这是域名优选服务的管理界面，不是 Torrent Harbor 下载器管理界面。
-
-用户主要任务：确认服务正常、找到需要处理的站点、维护优选域名、理解当前生效策略及优选的实际作用。
-
-设计采用管理工具模式：先给结论，再提供证据；站点是主要操作对象；公开连接检测、自然汇报和文件流量分别展示。手机优先查看状态，复杂诊断按需展开。
-
-不能为界面整洁隐藏错误、把过期数据当实时数据、把未观测当成功，或为了测试启动下载和长期试验。前端变化不得改变后台保护条件和配置写入归属。
+TrackCloudflareSpeed is a standalone domain optimizer and DNS service with a NAS management UI. It is independent of Torrent Harbor. Portable deployment excludes host-specific downloader controllers and automatically generated private state.

@@ -1,0 +1,14 @@
+*
+!*.py
+!web/
+!web/**
+!tools/
+!tools/fetch_cfst.py
+!tools/smoke.py
+!build/
+!build/cfst.tar.gz
+!config/
+!config/settings.json
+!config/cloudflare-ipv4.txt
+!docs/
+!docs/CloudflareSpeedTest-LICENSE

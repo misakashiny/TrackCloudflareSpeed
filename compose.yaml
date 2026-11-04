@@ -1,0 +1,84 @@
+name: trackcloudflare
+x-common: &common
+  image: trackcloudflare:1.10-portable.1
+  platform: linux/amd64
+  user: "1000:1000"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  environment:
+    EXCLUDED_KEYWORDS: ${EXCLUDED_KEYWORDS:-}
+  restart: unless-stopped
+  tmpfs: ["/tmp:size=16m,mode=1777"]
+  mem_limit: 192m
+  cpus: 0.50
+  pids_limit: 48
+  logging:
+    driver: json-file
+    options: {max-size: 2m, max-file: "3"}
+services:
+  init:
+    <<: *common
+    build: .
+    user: "0:0"
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER]
+    restart: "no"
+    entrypoint: [python, -c]
+    command:
+      - |
+        import os,pathlib
+        root=pathlib.Path('/service')
+        os.chown(root,1000,1000)
+        for name in ['state','dns','control','work']:
+            p=root/name;p.mkdir(exist_ok=True);os.chown(p,1000,1000)
+    volumes: [runtime:/service]
+  optimizer:
+    <<: *common
+    command: [worker]
+    depends_on: {init: {condition: service_completed_successfully}}
+    volumes: ["./config:/service/config:ro", "runtime:/service"]
+    healthcheck:
+      test: [CMD, python, /app/optimizer.py, --health]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+  dashboard:
+    <<: *common
+    command: [ui]
+    depends_on: {init: {condition: service_completed_successfully}}
+    environment:
+      EXCLUDED_KEYWORDS: ${EXCLUDED_KEYWORDS:-}
+      UI_BIND: 0.0.0.0
+      UI_PORT: "9078"
+      UI_PUBLIC_HOST: ${UI_PUBLIC_HOST:-127.0.0.1:9078}
+      UI_CLIENT_NETWORK: ${UI_CLIENT_NETWORK:-127.0.0.0/8,172.16.0.0/12}
+      UI_STATE: /service/state
+      UI_CONTROL: /service/control
+      UI_SETTINGS: /settings/settings.json
+      UI_DNS: /service/dns/active.hosts
+    ports: ["${UI_PUBLISH_ADDRESS:-127.0.0.1}:${UI_PUBLISH_PORT:-9078}:9078"]
+    volumes: ["./config:/settings:ro", "runtime:/service"]
+    healthcheck:
+      test: [CMD, python, -c, "import os,urllib.request; urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:9078/healthz',headers={'Host':os.environ['UI_PUBLIC_HOST']}),timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  guard:
+    <<: *common
+    command: [guard]
+    depends_on: {init: {condition: service_completed_successfully}}
+    volumes: ["./config:/project/config:ro", "runtime:/project/runtime"]
+  dns:
+    <<: *common
+    entrypoint: [dnsmasq]
+    depends_on: {init: {condition: service_completed_successfully}}
+    ports:
+      - "${DNS_PUBLISH_ADDRESS:-127.0.0.1}:${DNS_PUBLISH_PORT:-5353}:5353/udp"
+      - "${DNS_PUBLISH_ADDRESS:-127.0.0.1}:${DNS_PUBLISH_PORT:-5353}:5353/tcp"
+    volumes: ["runtime:/service:ro"]
+    # Use the shared DNS subdirectory, which receives atomic hosts files.
+    command: [--keep-in-foreground, --port=5353, --no-resolv, --no-hosts, "--server=${DNS_UPSTREAM:-1.1.1.1}", --hostsdir=/service/dns, --local-ttl=30, --cache-size=0, --no-poll]
+volumes:
+  runtime:
